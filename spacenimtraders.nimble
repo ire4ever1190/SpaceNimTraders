@@ -2,14 +2,14 @@
 
 version       = "0.1.0"
 author        = "Jake Leahy"
-description   = "A new awesome nimble package"
+description   = "API wrapper for the game spacetraders (https://spacetraders.io)"
 license       = "MIT"
 srcDir        = "src"
 
 
 # Dependencies
 
-requires "nim >= 1.4.0"
+requires "nim >= 1.2.0"
 
 task ex, "Runs the example":
     # exec "nim c -d:ssl -d:traderDebug -r example"
