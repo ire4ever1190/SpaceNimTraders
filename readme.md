@@ -41,7 +41,7 @@ Let's kick off our trade empire by taking out a small low-risk loan. We can use 
 
 ```nim
 for loan in waitFor client.getLoans:
-	echo waitFor client.getLoans()
+    echo waitFor client.getLoans()
 ```
 
 ### Take Out A Loan
@@ -58,7 +58,7 @@ Now our credits are looking much healthier! But remember, you will have to pay i
 
 ```nim
 for ship in waitFor client.getShips(MK1):
-	echo ship
+    echo ship
 ```
 
 Choose one of the available ships and send a request to purchase it. The Jackshaw looks like a good cheap option.
@@ -101,7 +101,7 @@ Now we need to find a nearby planet to unload our cargo.
 
 ```nim
 for planet in waitFor client.getLocations(ship.getSystem(), Planet):
-	echo planet
+    echo planet
 ```
 
 Looks like Prime is right next to us. Let's create a flight plan to send our ship to the planet.
