@@ -11,7 +11,7 @@ SpaceTraders is a typical fleet management / trading / strategy game. Right now 
 
 To follow this guide you first need to install the library
 
-`nimble install https://github.com/ire4ever1190/spacenimtraders`
+`nimble install spacenimtraders`
 
 You can then follow along by running it all in a nim file or by using `inim`
 
