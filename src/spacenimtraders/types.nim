@@ -14,6 +14,7 @@ type
         MK1 = "MK-I"
         MK2 = "MK-II"
         MK3 = "MK-III"
+        MK4 = "MK-IV"
 
     Goods* = enum # Hopefully this doesn't get too big
         Fuel = "FUEL"
@@ -100,7 +101,7 @@ type
         cargo*: seq[Cargo]
         class: ShipClass
         id*: string
-        location*: string
+        location*: Option[string] # Is nil when in flight
         manufacturer: string
         maxCargo: int
         plating: int
@@ -108,8 +109,8 @@ type
         speed: int
         `type`: string
         weapons: int
-        x*: int
-        y*: int
+        x*: Option[int] # X and Y are also nil when in flight
+        y*: Option[int]
 
     PurchaseOrder* = object
         credits*: int
@@ -148,11 +149,18 @@ type
         createdFlightPlan*: proc (shipID, destination: string, plan: FlightPlan) {.async.}
         boughtGoods*:       proc (good: Goods, amount: int, shipID: string) {.async.}
         soldGoods*:         proc (good: GOods, amount: int, shipID: string) {.async.}
+
+    Cache* = ref object
+        market*: Table[string, MarketPlace]
         
-    Client* = ref object
+    ClientBase* = ref object of RootObj
         username*: string
         credits*: int
         token*: string
+        cache*: Cache # Seperate type is used incase I expand this later
         loans*: Table[string, UserLoan]
         ships*: Table[string, UserShip]
         events*: Events
+
+    Client* = ref object of ClientBase
+    AsyncClient* = ref object of ClientBase

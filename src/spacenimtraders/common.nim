@@ -19,18 +19,28 @@ proc newClient*(username, token: string): Client =
     result = Client(
         username: username,
         token: token,
-        events: Events()
+        events: Events(),
+        cache: Cache()
+    )
+    discard result.getUser()
+
+proc newAsyncClient*(username, token: string): AsyncClient =
+    ## Creates a new async client instance
+    ## Note; This does not create the account for you
+    result = AsyncClient(
+        username: username,
+        token: token,
+        events: Events(),
+        cache: Cache()
     )
     discard waitFor result.getUser()
 
-proc newClient*(username: string): Client =
-    ## Claims a new username and returns the generated client
+proc claimUsername*(username: string): string =
+    ## Claims a username and returns the token
     let httpclient = newHttpClient()
     let response = httpclient.postContent(fmt"https://api.spacetraders.io/users/{username}/token")
-    let token = response.parseJson()["token"].getStr()
-    return newClient(username, token)
-
-
+    result = response.parseJson()["token"].getStr()
+        
 #
 # toString functions
 #

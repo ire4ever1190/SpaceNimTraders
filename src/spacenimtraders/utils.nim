@@ -2,6 +2,8 @@ import types
 
 import std/math
 import std/asyncdispatch
+import std/tables
+import std/options
 
 ## `Utils` contains helper functions that implement common tasks to make your life easier
 ## 
@@ -19,7 +21,7 @@ when defined(traderDebug):
         echo "================================"
         echo ""
 
-proc canAfford*(ships: seq[Ship], client: Client): seq[Ship] =
+proc canAfford*(ships: seq[Ship], client: Client | AsyncClient): seq[Ship] =
     ## Returns a list of ships that the user can afford
     for ship in ships:
         block outer:
@@ -58,13 +60,13 @@ proc getVolume*(good: Goods): int =
 
 proc getSystem*(ship: UserShip): string =
     ## Gets the current system that a ship is in
-    result = ship.location[0..1]
+    result = ship.location.get()[0..1]
 
 proc getDistance*(ship: UserShip, location: Location): float64 =
     ## Gets the distance between a ship and a location
     let
-        deltaX = abs(ship.x - location.x).float64
-        deltaY = abs(ship.x - location.x).float64
+        deltaX = abs(ship.x.get() - location.x).float64
+        deltaY = abs(ship.x.get() - location.x).float64
     result = sqrt(
         deltaX.pow(2.0) + deltaY.pow(2.0)
     )
@@ -73,7 +75,7 @@ proc getClosest*(locations: seq[Location], ship: UserShip): Location =
     ## Returns the closest location to the ship
     var minDistance = float64.high
     for location in locations:
-        if location.symbol != ship.location:
+        if location.symbol != ship.location.get():
             let distance = ship.getDistance(location)
             if distance < minDistance:
                 result = location
@@ -99,6 +101,12 @@ proc volPrice*(market: MarketPlace, goodSymbol: Goods): float64 =
     ## Calculates the cost / volume ratio of a good in a market
     let price = market.price(goodSymbol)
     result = price / goodSymbol.getVolume()
+
+proc shipInLocation*(client: Client | AsyncClient, location: string): bool =
+    ## Returns true if the client has a ship at `location`
+    for ship in client.ships.values():
+        if ship.location.get() == location:
+            return true
 
 proc bestPriceDiff*(x, y: MarketPlace): Goods =
     ## Gets item that you can buy in x that gets best price in Y

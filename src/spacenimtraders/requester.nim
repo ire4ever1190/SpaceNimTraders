@@ -7,18 +7,21 @@ import std/httpcore
 import std/asyncdispatch
 import std/json
 import std/uri
+import std/os
 import std/strformat
 import std/strutils
 
-proc newHttpClient(client: Client): AsyncHttpClient =
+proc newHttpClient(client: Client | AsyncClient): HttpClient | AsyncHttpClient =
     ## Create a new AsyncHttpClient with default settings
     let headers = newHttpHeaders {
         "Authorization": "Bearer " & client.token.strip(),
     }
-    result = newAsyncHttpClient(
-        headers = headers,
-        userAgent = clientUserAgent
-    )
+    when client is Client:
+        result = newHttpClient(userAgent = clientUserAgent)
+    else:
+        result = newAsyncHttpClient(userAgent = clientUserAgent)
+
+    result.headers = headers
 
 proc checkError(statusCode: HttpCode, responseJson: JsonNode) =
     ## Runs a check against the response and raises an apporiate exception
@@ -29,7 +32,7 @@ proc checkError(statusCode: HttpCode, responseJson: JsonNode) =
         ## TODO: Have different exceptions for the different error codes    
         raise newException(ApiError, message)
 
-proc request*(client: Client, url: string, verb: HttpMethod, reqBody: string = "", params: seq[(string, string)] = @[]): Future[AsyncResponse] {.async.} =
+proc request*(client: Client | AsyncClient, url: string, verb: HttpMethod, reqBody: string = "", params: seq[(string, string)] = @[]): Future[Response | AsyncResponse] {.multisync.} =
     ## Make a request to the api
     # Create a new client since nim still cant reuse old sockets
     let httpClient = client.newHttpClient()
@@ -58,10 +61,13 @@ proc request*(client: Client, url: string, verb: HttpMethod, reqBody: string = "
         # Backoff for a bit and then retry
         when defined(traderDebug):
             debug("Retrying request in 2 seconds")
-        await sleepAsync(550)
+        when client is Client:
+            sleep(550)
+        else:
+            await sleepAsync(550)
         result = await client.request(fullURL, verb, body, params)
 
-proc parseJson*[T](response: AsyncResponse, to: typedesc[T], accessTop: bool = true): Future[T] {.async.} =
+proc parseJson*[T](response: Response | AsyncResponse, to: typedesc[T], accessTop: bool = true): Future[T] {.multisync.} =
     ## Parses the body of an async response in one call
     ## accessTop means to go into the top parent element first if there is only one
     let body = await response.body()
