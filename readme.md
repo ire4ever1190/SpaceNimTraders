@@ -43,7 +43,7 @@ Let's kick off our trade empire by taking out a small low-risk loan. We can use 
 
 ```nim
 for loan in client.getLoans:
-    echo waitFor client.getLoans()
+    echo client.getLoans()
 ```
 
 ### Take Out A Loan
